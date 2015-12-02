@@ -1,26 +1,33 @@
-#Project
+###########
+##Project##
+###########
+
 library(shiny)
 library(quantmod)
+
+# For future functionalities
 #library(TSA)
 #library(VGAM)
+#library(dplyr)
+#library(ggplot2)
 #library(RODBC)
 
-# Define server logic for random distribution application
+
 shinyServer(function(input, output) {
   
   ## Acquiring data
   
-  ### Get stock symbol  
+  ### Get stock symbol
   dataInput <- reactive({
     if (input$get == 0)
       return(NULL)
     
     return(isolate({
-      getSymbols(input$symb, src = "yahoo", auto.assign = FALSE)
+      getSymbols(input$symb, src = "yahoo", auto.assign = F)
     }))
   })
   
-  ### Get stock date range    
+  ### Get date range
   datesInput <- reactive({
     if (input$get == 0)
       return(NULL)
@@ -30,27 +37,12 @@ shinyServer(function(input, output) {
     }))
   })
   
-  returns <- reactive({ 
-    if (input$get == 0)
-      return(NULL)
-    
-    dailyReturn(dataInput())
-  })
-  
-  xs <- reactive({ 
-    if (input$get == 0)
-      return(NULL)
-    
-    span <- range(returns())
-    seq(span[1], span[2], by = diff(span) / 100)
-  })
-  
+
   # tab based controls
   output$newBox <- renderUI({
     switch(input$tab,
-           "Charts" = chartControls,
-           "Model" = modelControls,
-           "VaR" = helpText("VaR")
+           "Charts" = chartControls
+           #"TSA" = modelControls # Future functionalities
     )
   })
   

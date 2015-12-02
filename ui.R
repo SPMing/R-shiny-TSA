@@ -1,5 +1,9 @@
-#Project
+###########
+##Project##
+###########
+
 library(shiny)
+
 
 # Define UI 
 shinyUI(pageWithSidebar(
@@ -10,7 +14,7 @@ shinyUI(pageWithSidebar(
     
     helpText("Select a stock and information will be collected from yahoo finance."),
     
-    textInput("symb", "Stock Symbol", "AAPL"),
+    textInput("symb", "Stock Symbol", "aapl"),
     
     dateRangeInput("dates", 
                    "Start-Date to End-Date",
