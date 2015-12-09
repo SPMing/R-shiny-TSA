@@ -5,7 +5,8 @@
 library(shiny)
 library(quantmod)
 
-# For future functionalities
+# Libraries for new functionalities 
+# to be added in the future
 #library(TSA)
 #library(VGAM)
 #library(dplyr)
@@ -18,7 +19,7 @@ shinyServer(function(input, output) {
   ## Acquiring data
   
   ### Get stock symbol
-  dataInput <- reactive({
+  data.input <- reactive({
     if (input$get == 0)
       return(NULL)
     
@@ -28,7 +29,7 @@ shinyServer(function(input, output) {
   })
   
   ### Get date range
-  datesInput <- reactive({
+  date.input <- reactive({
     if (input$get == 0)
       return(NULL)
     
@@ -38,70 +39,79 @@ shinyServer(function(input, output) {
   })
   
 
-  # tab based controls
+  # Tab based controls
   output$newBox <- renderUI({
     switch(input$tab,
            "Charts" = chartControls
-           #"TSA" = modelControls # Future functionalities
     )
   })
   
-  # Charts tab
+  # Define chart tabs
   chartControls <- div(
     wellPanel(
       selectInput("chart_type",
                   label = "Chart type",
-                  choices = c("Candlestick" = "candlesticks", 
+                  choices = c("Line" = "line",
+                              "Candlestick" = "candlesticks", 
                               "Matchstick" = "matchsticks",
-                              "Bar" = "bars",
-                              "Line" = "line"),
+                              "Bar" = "bars"),
                   selected = "Line"
       ),
       checkboxInput(inputId = "log_y", label = "log y-axis", 
                     value = FALSE)
     ),
-    
+
+    # Define add-in analytics functions   
     wellPanel(
       p(strong("Analysis")),
-      checkboxInput("ta_vol", label = "Volume", value = FALSE),
-      checkboxInput("ta_sma", label = "Simple Moving Average", 
+      checkboxInput("ta_vol", 
+                    label = "Volume", 
                     value = FALSE),
-      checkboxInput("ta_ema", label = "Exponential Moving Average", 
+      checkboxInput("ta_sma", 
+                    label = "Simple Moving Average", 
                     value = FALSE),
-      checkboxInput("ta_wma", label = "Weighted Moving Average", 
+      checkboxInput("ta_ema", 
+                    label = "Exponential Moving Average", 
                     value = FALSE),
-      checkboxInput("ta_bb", label = "Bollinger Bands", 
+      checkboxInput("ta_wma", 
+                    label = "Weighted Moving Average", 
                     value = FALSE),
-      checkboxInput("ta_momentum", label = "Momentum", 
+      checkboxInput("ta_bb", 
+                    label = "Bollinger Bands", 
+                    value = FALSE),
+      checkboxInput("ta_momentum", 
+                    label = "Momentum", 
                     value = FALSE),
       
       br(),
       
-      actionButton("chart_act", "Click to Add Analysis")
+      actionButton("chart_action", "Click to Add Analysis")
     )
   )
-  
-  TAInput <- reactive({
-    if (input$chart_act == 0)
+
+  # Define reactive function that reads in user's actions 
+  analysis.input <- reactive({
+    if (input$chart_action == 0)
       return("NULL")
     
-    tas <- isolate({c(input$ta_vol, input$ta_sma, input$ta_ema, 
+    analysis <- isolate({c(input$ta_vol, input$ta_sma, input$ta_ema, 
                       input$ta_wma,input$ta_bb, input$ta_momentum)})
-    funcs <- c(addVo(), addSMA(), addEMA(), addWMA(), 
+    add.analysis <- c(addVo(), addSMA(), addEMA(), addWMA(), 
                addBBands(), addMomentum())
     
-    if (any(tas)) funcs[tas]
+    if (any(analysis)) add.analysis[analysis]
     else "NULL"
   })
   
+  # Define chart output type
   output$chart <- renderPlot({
-    chartSeries(dataInput(),
+    chartSeries(data.input(),
                 name = input$symb,
                 type = input$chart_type,
-                subset = datesInput(),
+                subset = date.input(),
                 log.scale = input$log_y,
                 theme = "white",
-                TA = TAInput())
+                TA = analysis.input())
   })
   
 })
